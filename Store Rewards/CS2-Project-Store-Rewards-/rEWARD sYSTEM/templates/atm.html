@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATM Deposit</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { min-height: 100vh; display: flex; flex-direction: column; background: var(--bg); }
+        .topbar { width: 100%; padding: 1.2rem 2.5rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.06); background: rgba(6,9,18,0.8); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 10; }
+        .topbar-brand { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 800; color: #fff; }
+        .topbar-back { font-size: 0.82rem; color: #6b7a99; text-decoration: none; transition: color 0.2s; }
+        .topbar-back:hover { color: #eef2ff; }
+        .main { flex: 1; padding: 3rem 2.5rem; max-width: 700px; width: 100%; margin: 0 auto; }
+        .page-heading { margin-bottom: 2.5rem; }
+        .page-heading h1 { font-family: 'Syne', sans-serif; font-size: 2.8rem; font-weight: 800; color: #fff; letter-spacing: -0.03em; margin-bottom: 0.3rem; }
+        .page-heading p { color: #6b7a99; font-size: 0.95rem; }
+        .balance-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 20px; padding: 2rem; margin-bottom: 2rem; }
+        .balance-label { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: #6b7a99; margin-bottom: 10px; }
+        .balance-value { font-family: 'Syne', sans-serif; font-size: 3rem; font-weight: 800; color: #fff; line-height: 1; }
+        .quick-amounts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px; }
+        .quick-btn { padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04); color: #94a3b8; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .quick-btn:hover { border-color: rgba(79,142,247,0.4); color: #4f8ef7; background: rgba(79,142,247,0.07); }
+        input { width: 100%; padding: 15px 18px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: #eef2ff; font-size: 1rem; outline: none; transition: border-color 0.2s; margin-bottom: 6px; }
+        input:focus { border-color: rgba(79,142,247,0.6); }
+        input::placeholder { color: #4a5568; }
+        input.invalid { border-color: rgba(255,77,109,0.6); }
+        .field-error { color: #ff4d6d; font-size: 0.8rem; margin-bottom: 10px; display: none; }
+        .field-error.show { display: block; }
+        .btn { display: block; width: 100%; padding: 15px; border-radius: 14px; font-weight: 600; font-size: 0.95rem; text-align: center; border: none; cursor: pointer; transition: all 0.2s ease; margin-bottom: 10px; }
+        .btn-primary { background: #4f8ef7; color: white; }
+        .btn-primary:hover { background: #3a7ef0; }
+        .message { padding: 14px 18px; border-radius: 12px; margin-bottom: 1.5rem; font-size: 0.9rem; background: rgba(79,142,247,0.1); border: 1px solid rgba(79,142,247,0.2); color: #4f8ef7; }
+    </style>
+</head>
+<body>
+    <nav class="topbar">
+        <span class="topbar-brand">Reward Banking</span>
+        <a href="/dashboard" class="topbar-back">← Back to Dashboard</a>
+    </nav>
+    <main class="main">
+        <div class="page-heading">
+            <h1>ATM Deposit</h1>
+            <p>Add funds to your account</p>
+        </div>
+        <div class="balance-card">
+            <div class="balance-label">Current Balance</div>
+            <div class="balance-value">₱{{ "{:,.2f}".format(money) }}</div>
+        </div>
+        {% if message %}
+        <div class="message">{{ message }}</div>
+        {% endif %}
+        <form method="POST" id="atmForm" novalidate>
+            <div class="quick-amounts">
+                <button type="button" class="quick-btn" onclick="setAmount(100)">₱100</button>
+                <button type="button" class="quick-btn" onclick="setAmount(500)">₱500</button>
+                <button type="button" class="quick-btn" onclick="setAmount(1000)">₱1,000</button>
+                <button type="button" class="quick-btn" onclick="setAmount(5000)">₱5,000</button>
+            </div>
+            <input id="amountInput" name="amount" type="number" placeholder="Enter custom amount">
+            <span class="field-error" id="amount-error"></span>
+            <button type="submit" class="btn btn-primary">Deposit</button>
+        </form>
+    </main>
+    <script>
+        function setAmount(val) {
+            document.getElementById('amountInput').value = val;
+            document.getElementById('amountInput').classList.remove('invalid');
+            document.getElementById('amount-error').classList.remove('show');
+        }
+        document.getElementById('atmForm').addEventListener('submit', function(e) {
+            const input = document.getElementById('amountInput');
+            const errorEl = document.getElementById('amount-error');
+            input.classList.remove('invalid');
+            errorEl.classList.remove('show');
+            const val = input.value.trim();
+            if (val === '') {
+                input.classList.add('invalid');
+                errorEl.textContent = 'Please enter an amount.';
+                errorEl.classList.add('show');
+                e.preventDefault();
+            } else if (isNaN(val) || parseInt(val) <= 0) {
+                input.classList.add('invalid');
+                errorEl.textContent = 'Amount must be a positive number.';
+                errorEl.classList.add('show');
+                e.preventDefault();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Store</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body { min-height: 100vh; display: flex; flex-direction: column; background: var(--bg); align-items: flex-start !important; justify-content: flex-start !important; }
+        .topbar { width: 100%; padding: 1.2rem 2.5rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.06); background: rgba(6,9,18,0.8); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 10; }
+        .topbar-brand { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 800; color: #fff; }
+        .topbar-back { font-size: 0.82rem; color: #6b7a99; text-decoration: none; transition: color 0.2s; }
+        .topbar-back:hover { color: #eef2ff; }
+        .main { flex: 1; padding: 2rem 2.5rem 3rem; max-width: 1100px; width: 100%; margin: 0 auto; }
+        .page-heading { margin-bottom: 1rem; }
+        .page-heading h1 { font-family: 'Syne', sans-serif; font-size: 2.8rem; font-weight: 800; color: #fff; letter-spacing: -0.03em; margin-bottom: 0.3rem; }
+        .page-heading p { color: #6b7a99; font-size: 0.95rem; }
+        .store-meta { display: flex; gap: 24px; margin-bottom: 1rem; font-size: 0.88rem; color: #6b7a99; }
+        .store-meta span { color: #eef2ff; font-weight: 600; }
+        .search-bar { width: 100%; padding: 12px 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: #eef2ff; font-size: 0.9rem; margin-bottom: 1rem; outline: none; }
+        .search-bar:focus { border-color: rgba(79,142,247,0.5); }
+        .category-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 2rem; }
+        .tab { padding: 8px 18px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04); color: #6b7a99; font-size: 0.82rem; font-weight: 600; text-decoration: none; transition: all 0.2s; cursor: pointer; }
+        .tab:hover { border-color: rgba(79,142,247,0.4); color: #4f8ef7; }
+        .tab.active { background: #4f8ef7; border-color: #4f8ef7; color: #fff; }
+        .message { padding: 12px 16px; border-radius: 12px; margin-bottom: 1.5rem; font-size: 0.9rem; background: rgba(79,142,247,0.1); border: 1px solid rgba(79,142,247,0.2); color: #4f8ef7; }
+        .message.error { background: rgba(255,77,109,0.1); border-color: rgba(255,77,109,0.2); color: #ff4d6d; }
+        .section { display: none; }
+        .section.active { display: block; }
+        .store-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; margin-bottom: 1.5rem; }
+        .item-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 16px; padding: 1rem; text-align: center; transition: all 0.2s ease; }
+        .item-card:hover { border-color: rgba(79,142,247,0.4); background: rgba(79,142,247,0.07); transform: translateY(-3px); }
+        .item-emoji { font-size: 2rem; margin-bottom: 0.5rem; }
+        .item-name { font-weight: 600; font-size: 0.85rem; text-transform: capitalize; color: #eef2ff; margin-bottom: 4px; }
+        .item-price { font-size: 0.8rem; color: #00f5c4; font-weight: 700; }
+        .qty-input { width: 100%; padding: 6px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: #eef2ff; text-align: center; margin-top: 6px; margin-bottom: 6px; outline: none; font-size: 0.82rem; }
+        .buy-btn { padding: 6px 14px; font-size: 0.78rem; border-radius: 8px; background: #4f8ef7; color: white; border: none; cursor: pointer; font-weight: 600; transition: background 0.2s; width: 100%; }
+        .buy-btn:hover { background: #3a7ef0; }
+    </style>
+</head>
+<body>
+    <nav class="topbar">
+        <span class="topbar-brand">Reward Banking</span>
+        <a href="/dashboard" class="topbar-back">← Back to Dashboard</a>
+    </nav>
+    <main class="main">
+        <div class="page-heading">
+            <h1>Store</h1>
+            <p>Browse and buy items</p>
+        </div>
+        <div class="store-meta">
+            Balance: <span>₱{{ "{:,.2f}".format(money) }}</span>
+            Points: <span>{{ points }} pts</span>
+        </div>
+        {% if message %}
+        <div class="message {% if 'Insufficient' in message %}error{% endif %}">{{ message }}</div>
+        {% endif %}
+        <form method="GET" style="margin-bottom:1rem;">
+            <input class="search-bar" type="text" name="search" placeholder="Search items..." value="{{ search }}">
+        </form>
+        <div class="category-tabs">
+            <button class="tab active" onclick="showTab('all', this)">🛒 All</button>
+            <button class="tab" onclick="showTab('tech', this)">💻 Tech</button>
+            <button class="tab" onclick="showTab('food', this)">🍔 Food</button>
+            <button class="tab" onclick="showTab('clothing', this)">👕 Clothing</button>
+            <button class="tab" onclick="showTab('accessories', this)">🕶️ Accessories</button>
+            <button class="tab" onclick="showTab('toys', this)">🧸 Toys</button>
+        </div>
+
+        {% set emojis = {
+            'laptop': '💻', 'mouse': '🖱️', 'keyboard': '⌨️', 'headphones': '🎧', 'phone': '📱',
+            'charger': '🔌', 'tablet': '📟', 'smartwatch': '⌚', 'earbuds': '🎵', 'usb hub': '🔗',
+            'burger': '🍔', 'pizza': '🍕', 'fries': '🍟', 'soda': '🥤', 'sandwich': '🥪',
+            'ramen': '🍜', 'rice meal': '🍱', 'coffee': '☕', 'milk tea': '🧋', 'cake slice': '🍰',
+            't-shirt': '👕', 'hoodie': '🧥', 'jeans': '👖', 'sneakers': '👟', 'cap': '🧢',
+            'socks': '🧦', 'jacket': '🥼', 'shorts': '🩳',
+            'sunglasses': '🕶️', 'wallet': '👛', 'backpack': '🎒', 'umbrella': '☂️',
+            'watch': '⌚', 'belt': '👔', 'phone case': '🪪',
+            'action figure': '🤖', 'board game': '🎲', 'rubiks cube': '🧩',
+            'lego set': '🧱', 'playing cards': '🃏', 'yo-yo': '🪀'
+        } %}
+
+        {% set tech_items = ['laptop', 'mouse', 'keyboard', 'headphones', 'phone', 'charger', 'tablet', 'smartwatch', 'earbuds', 'usb hub'] %}
+        {% set food_items = ['burger', 'pizza', 'fries', 'soda', 'sandwich', 'ramen', 'rice meal', 'coffee', 'milk tea', 'cake slice'] %}
+        {% set clothing_items = ['t-shirt', 'hoodie', 'jeans', 'sneakers', 'cap', 'socks', 'jacket', 'shorts'] %}
+        {% set accessories_items = ['sunglasses', 'wallet', 'backpack', 'umbrella', 'watch', 'belt', 'phone case'] %}
+        {% set toys_items = ['action figure', 'board game', 'rubiks cube', 'lego set', 'playing cards', 'yo-yo'] %}
+
+        <!-- ALL -->
+        <div class="section active" id="tab-all">
+            <div class="store-grid">
+                {% for item, price in items.items() %}
+                <form method="POST">
+                    <div class="item-card">
+                        <div class="item-emoji">{{ emojis.get(item, '🛍️') }}</div>
+                        <div class="item-name">{{ item }}</div>
+                        <div class="item-price">₱{{ "{:,.0f}".format(price) }}</div>
+                        <input class="qty-input" type="number" name="quantity" value="1" min="1" max="99">
+                        <button class="buy-btn" type="submit" name="item" value="{{ item }}">Buy</button>
+                    </div>
+                </form>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- TECH -->
+        <div class="section" id="tab-tech">
+            <div class="store-grid">
+                {% for item, price in items.items() %}{% if item in tech_items %}
+                <form method="POST">
+                    <div class="item-card">
+                        <div class="item-emoji">{{ emojis.get(item, '🛍️') }}</div>
+                        <div class="item-name">{{ item }}</div>
+                        <div class="item-price">₱{{ "{:,.0f}".format(price) }}</div>
+                        <input class="qty-input" type="number" name="quantity" value="1" min="1" max="99">
+                        <button class="buy-btn" type="submit" name="item" value="{{ item }}">Buy</button>
+                    </div>
+                </form>
+                {% endif %}{% endfor %}
+            </div>
+        </div>
+
+        <!-- FOOD -->
+        <div class="section" id="tab-food">
+            <div class="store-grid">
+                {% for item, price in items.items() %}{% if item in food_items %}
+                <form method="POST">
+                    <div class="item-card">
+                        <div class="item-emoji">{{ emojis.get(item, '🛍️') }}</div>
+                        <div class="item-name">{{ item }}</div>
+                        <div class="item-price">₱{{ "{:,.0f}".format(price) }}</div>
+                        <input class="qty-input" type="number" name="quantity" value="1" min="1" max="99">
+                        <button class="buy-btn" type="submit" name="item" value="{{ item }}">Buy</button>
+                    </div>
+                </form>
+                {% endif %}{% endfor %}
+            </div>
+        </div>
+
+        <!-- CLOTHING -->
+        <div class="section" id="tab-clothing">
+            <div class="store-grid">
+                {% for item, price in items.items() %}{% if item in clothing_items %}
+                <form method="POST">
+                    <div class="item-card">
+                        <div class="item-emoji">{{ emojis.get(item, '🛍️') }}</div>
+                        <div class="item-name">{{ item }}</div>
+                        <div class="item-price">₱{{ "{:,.0f}".format(price) }}</div>
+                        <input class="qty-input" type="number" name="quantity" value="1" min="1" max="99">
+                        <button class="buy-btn" type="submit" name="item" value="{{ item }}">Buy</button>
+                    </div>
+                </form>
+                {% endif %}{% endfor %}
+            </div>
+        </div>
+
+        <!-- ACCESSORIES -->
+        <div class="section" id="tab-accessories">
+            <div class="store-grid">
+                {% for item, price in items.items() %}{% if item in accessories_items %}
+                <form method="POST">
+                    <div class="item-card">
+                        <div class="item-emoji">{{ emojis.get(item, '🛍️') }}</div>
+                        <div class="item-name">{{ item }}</div>
+                        <div class="item-price">₱{{ "{:,.0f}".format(price) }}</div>
+                        <input class="qty-input" type="number" name="quantity" value="1" min="1" max="99">
+                        <button class="buy-btn" type="submit" name="item" value="{{ item }}">Buy</button>
+                    </div>
+                </form>
+                {% endif %}{% endfor %}
+            </div>
+        </div>
+
+        <!-- TOYS -->
+        <div class="section" id="tab-toys">
+            <div class="store-grid">
+                {% for item, price in items.items() %}{% if item in toys_items %}
+                <form method="POST">
+                    <div class="item-card">
+                        <div class="item-emoji">{{ emojis.get(item, '🛍️') }}</div>
+                        <div class="item-name">{{ item }}</div>
+                        <div class="item-price">₱{{ "{:,.0f}".format(price) }}</div>
+                        <input class="qty-input" type="number" name="quantity" value="1" min="1" max="99">
+                        <button class="buy-btn" type="submit" name="item" value="{{ item }}">Buy</button>
+                    </div>
+                </form>
+                {% endif %}{% endfor %}
+            </div>
+        </div>
+    </main>
+    <script>
+        function showTab(name, el) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById('tab-' + name).classList.add('active');
+            el.classList.add('active');
+        }
+    </script>
+</body>
+</html>

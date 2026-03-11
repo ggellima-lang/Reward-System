@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { min-height: 100vh; display: flex; flex-direction: column; background: var(--bg); }
+        .topbar { width: 100%; padding: 1.2rem 2.5rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.06); background: rgba(6,9,18,0.8); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 10; }
+        .topbar-brand { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 800; color: #fff; }
+        .topbar-back { font-size: 0.82rem; color: #6b7a99; text-decoration: none; transition: color 0.2s; }
+        .topbar-back:hover { color: #eef2ff; }
+        .main { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 3rem 2.5rem; max-width: 500px; width: 100%; margin: 0 auto; }
+        .page-heading { margin-bottom: 2.5rem; }
+        .page-heading h1 { font-family: 'Syne', sans-serif; font-size: 2.8rem; font-weight: 800; color: #fff; letter-spacing: -0.03em; margin-bottom: 0.3rem; }
+        .page-heading p { color: #6b7a99; font-size: 0.95rem; }
+        .field-wrap { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
+        input { width: 100%; padding: 15px 18px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: #eef2ff; font-size: 0.95rem; outline: none; transition: border-color 0.2s; }
+        input:focus { border-color: rgba(79,142,247,0.6); }
+        input::placeholder { color: #4a5568; }
+        input.invalid { border-color: rgba(255,77,109,0.6); }
+        .field-error { color: #ff4d6d; font-size: 0.8rem; padding-left: 4px; display: none; }
+        .field-error.show { display: block; }
+        .server-error { background: rgba(255,77,109,0.08); border: 1px solid rgba(255,77,109,0.2); color: #ff4d6d; border-radius: 12px; padding: 12px 16px; font-size: 0.88rem; margin-bottom: 1rem; }
+        .server-success { background: rgba(0,245,196,0.08); border: 1px solid rgba(0,245,196,0.25); color: #00f5c4; border-radius: 12px; padding: 14px 18px; font-size: 0.92rem; margin-bottom: 1.2rem; font-weight: 500; }
+        .server-success a { color: #00f5c4; font-weight: 700; text-decoration: underline; }
+        .form-group { margin-bottom: 1.5rem; }
+        .btn { display: block; width: 100%; padding: 15px; border-radius: 14px; font-weight: 600; font-size: 0.95rem; text-align: center; border: none; cursor: pointer; transition: all 0.2s ease; }
+        .btn-primary { background: #4f8ef7; color: white; box-shadow: 0 4px 20px rgba(79,142,247,0.3); }
+        .btn-primary:hover { background: #3a7ef0; }
+        .footer-link { text-align: center; margin-top: 1.5rem; font-size: 0.85rem; color: #6b7a99; }
+        .footer-link a { color: #4f8ef7; text-decoration: none; font-weight: 600; }
+        .footer-link a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <nav class="topbar">
+        <span class="topbar-brand">Reward Banking</span>
+        <a href="/" class="topbar-back">← Back</a>
+    </nav>
+    <main class="main">
+        <div class="page-heading">
+            <h1>Create Account</h1>
+            <p>Fill in your details to get started</p>
+        </div>
+        {% if success %}
+        <div class="server-success">✅ {{ success }} <a href="/login">Login here →</a></div>
+        {% endif %}
+        {% if error %}
+        <div class="server-error">{{ error }}</div>
+        {% endif %}
+        <form method="POST" id="registerForm" novalidate>
+            <div class="form-group">
+                <div class="field-wrap">
+                    <input id="username" name="username" placeholder="Username" autocomplete="off">
+                    <span class="field-error" id="username-error"></span>
+                </div>
+                <div class="field-wrap">
+                    <input id="password" name="password" type="password" placeholder="Password">
+                    <span class="field-error" id="password-error"></span>
+                </div>
+                <div class="field-wrap">
+                    <input id="name" name="name" placeholder="Full Name">
+                    <span class="field-error" id="name-error"></span>
+                </div>
+                <div class="field-wrap">
+                    <input id="age" name="age" placeholder="Age" type="number">
+                    <span class="field-error" id="age-error"></span>
+                </div>
+                <div class="field-wrap">
+                    <input id="address" name="address" placeholder="Address">
+                    <span class="field-error" id="address-error"></span>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Create Account</button>
+        </form>
+        <div class="footer-link">
+            Already have an account? <a href="/login">Login here</a>
+        </div>
+    </main>
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            let valid = true;
+            const fields = [
+                { id: 'username', errorId: 'username-error', label: 'Username', minLen: 2 },
+                { id: 'password', errorId: 'password-error', label: 'Password', minLen: 4 },
+                { id: 'name',     errorId: 'name-error',     label: 'Full Name', minLen: 2 },
+                { id: 'age',      errorId: 'age-error',      label: 'Age', isAge: true },
+                { id: 'address',  errorId: 'address-error',  label: 'Address', minLen: 3 },
+            ];
+            fields.forEach(f => {
+                document.getElementById(f.id).classList.remove('invalid');
+                const err = document.getElementById(f.errorId);
+                err.textContent = '';
+                err.classList.remove('show');
+            });
+            fields.forEach(f => {
+                const input = document.getElementById(f.id);
+                const err = document.getElementById(f.errorId);
+                const val = input.value.trim();
+                if (val === '') {
+                    input.classList.add('invalid');
+                    err.textContent = f.label + ' is required.';
+                    err.classList.add('show');
+                    valid = false;
+                } else if (f.isAge) {
+                    const num = parseInt(val);
+                    if (isNaN(num) || num < 1 || num > 120) {
+                        input.classList.add('invalid');
+                        err.textContent = 'Enter a valid age between 1 and 120.';
+                        err.classList.add('show');
+                        valid = false;
+                    }
+                } else if (f.minLen && val.length < f.minLen) {
+                    input.classList.add('invalid');
+                    err.textContent = f.label + ' must be at least ' + f.minLen + ' characters.';
+                    err.classList.add('show');
+                    valid = false;
+                }
+            });
+            if (!valid) e.preventDefault();
+        });
+    </script>
+</body>
+</html>

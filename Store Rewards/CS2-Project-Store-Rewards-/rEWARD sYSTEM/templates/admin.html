@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Reward Banking</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        :root {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: rgba(6,9,18,0.8);
+            --bg-card: rgba(255,255,255,0.02);
+            --text-primary: #ffffff;
+            --text-secondary: #6b7a99;
+            --text-muted: #4a5568;
+            --accent-blue: #4f8ef7;
+            --accent-blue-hover: #3a7ef0;
+            --accent-green: #00f5c4;
+            --accent-red: #ff4d6d;
+            --border-primary: rgba(255,255,255,0.1);
+            --border-secondary: rgba(255,255,255,0.07);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { min-height: 100vh; display: flex; flex-direction: column; background: linear-gradient(135deg, #0a0e1a 0%, #1a1f2e 100%); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; align-items: flex-start !important; justify-content: flex-start !important; }
+        .topbar { width: 100%; padding: 1.2rem 2.5rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.06); background: var(--bg-secondary); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 10; }
+        .topbar-brand { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 800; color: var(--text-primary); text-decoration: none; }
+        .admin-badge { background: rgba(255,77,109,0.1); border: 1px solid rgba(255,77,109,0.3); color: var(--accent-red); font-size: 0.7rem; font-weight: 700; padding: 4px 12px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.08em; }
+        .admin-badge.active { background: rgba(0,245,196,0.1); border: 1px solid rgba(0,245,196,0.3); color: var(--accent-green); }
+        .main { flex: 1; padding: 2rem 2.5rem 3rem; max-width: 1100px; width: 100%; margin: 0 auto; }
+        .page-heading { margin-bottom: 2rem; text-align: center; }
+        .page-heading h1 { font-family: 'Syne', sans-serif; font-size: 2.8rem; font-weight: 800; color: var(--text-primary); letter-spacing: -0.03em; margin-bottom: 0.3rem; }
+        .page-heading p { color: var(--text-secondary); font-size: 0.95rem; }
+        .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 2rem; }
+        .stat-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 16px; padding: 1.4rem 1.6rem; }
+        .stat-label { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-secondary); margin-bottom: 8px; }
+        .stat-value { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; color: #fff; }
+        .stat-value.green { color: var(--accent-green); }
+        .stat-value.blue { color: var(--accent-blue); }
+        .login-container { max-width: 420px; margin: 0 auto; background: rgba(255,255,255,0.03); border: 1px solid var(--border-secondary); border-radius: 16px; padding: 2rem; }
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 0.5rem; font-weight: 500; }
+        input { width: 100%; padding: 13px 16px; border-radius: 12px; border: 1px solid var(--border-primary); background: rgba(255,255,255,0.05); color: #eef2ff; font-size: 0.9rem; outline: none; transition: all 0.2s ease; }
+        input:focus { border-color: rgba(79,142,247,0.6); background: rgba(255,255,255,0.08); box-shadow: 0 0 0 3px rgba(79,142,247,0.1); }
+        input::placeholder { color: var(--text-muted); }
+        input.invalid { border-color: rgba(255,77,109,0.6); }
+        .field-error { color: var(--accent-red); font-size: 0.8rem; margin-top: 4px; display: none; }
+        .field-error.show { display: block; }
+        .section-title { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-secondary); margin-bottom: 10px; }
+        .accounts-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+        .accounts-table th { text-align: left; padding: 12px 16px; color: var(--text-secondary); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; border-bottom: 1px solid var(--border-secondary); font-weight: 600; }
+        .accounts-table td { padding: 14px 16px; color: #eef2ff; border-bottom: 1px solid rgba(255,255,255,0.04); }
+        .accounts-table tbody tr { transition: background 0.2s ease; }
+        .accounts-table tbody tr:hover { background: rgba(79,142,247,0.05); }
+        .accounts-table .money-cell { color: var(--accent-green); font-weight: 700; }
+        .accounts-table .points-cell { color: var(--accent-blue); font-weight: 700; }
+        .accounts-table .username-cell { font-weight: 700; color: #fff; }
+        .accounts-table .age-cell { color: var(--text-secondary); }
+        .table-wrap { overflow-x: auto; border: 1px solid var(--border-secondary); border-radius: 16px; margin-bottom: 1.5rem; background: var(--bg-card); }
+        .btn { display: inline-block; width: 100%; padding: 13px 24px; border-radius: 12px; text-decoration: none; font-weight: 600; font-size: 0.9rem; border: none; cursor: pointer; transition: all 0.2s ease; text-align: center; }
+        .btn-primary { background: var(--accent-blue); color: white; }
+        .btn-primary:hover { background: var(--accent-blue-hover); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(79,142,247,0.3); }
+        .btn-danger { width: auto; color: var(--accent-red); border: 1px solid rgba(255,77,109,0.2); background: rgba(255,77,109,0.05); }
+        .btn-danger:hover { background: rgba(255,77,109,0.12); border-color: rgba(255,77,109,0.4); }
+        @media (max-width: 640px) {
+            .main { padding: 2rem 1.5rem; }
+            .page-heading h1 { font-size: 2rem; }
+            .stats-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="topbar">
+        <a href="/" class="topbar-brand">Reward Banking</a>
+        {% if accounts %}
+        <span class="admin-badge active">● Live</span>
+        {% else %}
+        <span class="admin-badge">● Restricted</span>
+        {% endif %}
+    </nav>
+    <main class="main">
+        <div class="page-heading">
+            <h1>Admin Panel</h1>
+            <p>{% if accounts %}Viewing all registered accounts{% else %}Restricted access{% endif %}</p>
+        </div>
+
+        {% if not accounts %}
+        <div class="login-container">
+            <form method="POST" id="adminForm" novalidate>
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" placeholder="Enter admin username" autocomplete="username">
+                    <span class="field-error" id="username-error"></span>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Enter admin password" autocomplete="current-password">
+                    <span class="field-error" id="password-error"></span>
+                </div>
+                <button type="submit" class="btn btn-primary">Login</button>
+            </form>
+        </div>
+
+        {% else %}
+
+        <!-- SUMMARY STATS -->
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-label">Total Accounts</div>
+                <div class="stat-value">{{ accounts | length }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total Money in System</div>
+                <div class="stat-value green">₱{{ "{:,.0f}".format(accounts.values() | sum(attribute=4)) }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total Points in System</div>
+                <div class="stat-value blue">{{ "{:,}".format(accounts.values() | sum(attribute=5)) }} pts</div>
+            </div>
+        </div>
+
+        <!-- ACCOUNTS TABLE -->
+        <div class="section-title">All Registered Users</div>
+        <div class="table-wrap">
+            <table class="accounts-table" role="table">
+                <thead>
+                    <tr>
+                        <th scope="col">Username</th>
+                        <th scope="col">Full Name</th>
+                        <th scope="col">Age</th>
+                        <th scope="col">Address</th>
+                        <th scope="col">Balance</th>
+                        <th scope="col">Points</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for acc, data in accounts.items() %}
+                    <tr>
+                        <td class="username-cell">{{ acc }}</td>
+                        <td>{{ data[1] }}</td>
+                        <td class="age-cell">{{ data[2] }}</td>
+                        <td class="age-cell">{{ data[3] }}</td>
+                        <td class="money-cell">₱{{ "{:,.2f}".format(data[4]) }}</td>
+                        <td class="points-cell">{{ "{:,}".format(data[5]) }} pts</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <a href="{{ url_for('logout') }}" class="btn btn-danger" style="width:auto; display:inline-block;">Logout</a>
+
+        {% endif %}
+    </main>
+    <script>
+        document.getElementById('adminForm')?.addEventListener('submit', function(e) {
+            let valid = true;
+            const username = document.getElementById('username');
+            const password = document.getElementById('password');
+            const usernameError = document.getElementById('username-error');
+            const passwordError = document.getElementById('password-error');
+            [username, password].forEach(el => el.classList.remove('invalid'));
+            [usernameError, passwordError].forEach(el => { el.textContent = ''; el.classList.remove('show'); });
+            if (username.value.trim() === '') {
+                username.classList.add('invalid');
+                usernameError.textContent = 'Username is required.';
+                usernameError.classList.add('show');
+                valid = false;
+            } else if (username.value.trim().length < 3) {
+                username.classList.add('invalid');
+                usernameError.textContent = 'Username must be at least 3 characters.';
+                usernameError.classList.add('show');
+                valid = false;
+            }
+            if (password.value === '') {
+                password.classList.add('invalid');
+                passwordError.textContent = 'Password is required.';
+                passwordError.classList.add('show');
+                valid = false;
+            } else if (password.value.length < 4) {
+                password.classList.add('invalid');
+                passwordError.textContent = 'Password must be at least 4 characters.';
+                passwordError.classList.add('show');
+                valid = false;
+            }
+            if (!valid) e.preventDefault();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg);
+        }
+
+        .topbar {
+            width: 100%;
+            padding: 1.2rem 2.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: rgba(6,9,18,0.8);
+        }
+
+        .topbar-brand {
+            font-family: 'Syne', sans-serif;
+            font-size: 1rem;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: -0.02em;
+        }
+
+        .topbar-user {
+            font-size: 0.82rem;
+            color: #6b7a99;
+        }
+
+        .topbar-user span {
+            color: #00f5c4;
+            font-weight: 600;
+        }
+
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 3rem 2.5rem;
+            max-width: 1100px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .page-heading {
+            margin-bottom: 2.5rem;
+        }
+
+        .page-heading h1 {
+            font-family: 'Syne', sans-serif;
+            font-size: 2.8rem;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: -0.03em;
+            margin-bottom: 0.3rem;
+        }
+
+        .page-heading p {
+            color: #6b7a99;
+            font-size: 0.95rem;
+            margin: 0;
+        }
+
+        .page-heading p span {
+            color: #00f5c4;
+            font-weight: 600;
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 2.5rem;
+        }
+
+        .stat-card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 20px;
+            padding: 1.8rem 2rem;
+            transition: border-color 0.2s;
+        }
+
+        .stat-card:hover {
+            border-color: rgba(79,142,247,0.3);
+        }
+
+        .stat-card .label {
+            font-size: 0.72rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #6b7a99;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .value {
+            font-family: 'Syne', sans-serif;
+            font-size: 2.4rem;
+            font-weight: 800;
+            color: #fff;
+            line-height: 1;
+        }
+
+        .stat-card .value small {
+            font-size: 0.9rem;
+            color: #00f5c4;
+            margin-left: 4px;
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            margin-bottom: 1rem;
+        }
+
+        .action-card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 20px;
+            padding: 2rem 1.5rem;
+            text-decoration: none;
+            color: #eef2ff;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            transition: all 0.2s ease;
+        }
+
+        .action-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(79,142,247,0.4);
+            background: rgba(79,142,247,0.07);
+        }
+
+        .action-card.primary {
+            background: #4f8ef7;
+            border: none;
+        }
+
+        .action-card.primary:hover {
+            background: #3a7ef0;
+            box-shadow: 0 10px 30px rgba(79,142,247,0.3);
+        }
+
+        .action-card.danger {
+            border-color: rgba(255,77,109,0.2);
+        }
+
+        .action-card.danger:hover {
+            border-color: rgba(255,77,109,0.4);
+            background: rgba(255,77,109,0.07);
+        }
+
+        .action-icon {
+            font-size: 1.8rem;
+        }
+
+        .action-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+        .action-desc {
+            font-size: 0.78rem;
+            color: rgba(255,255,255,0.5);
+            line-height: 1.4;
+        }
+
+        .action-card.primary .action-desc {
+            color: rgba(255,255,255,0.7);
+        }
+
+        .action-card.danger .action-title { color: #ff4d6d; }
+        .action-card.danger .action-desc { color: rgba(255,77,109,0.5); }
+    </style>
+</head>
+<body>
+    <nav class="topbar">
+        <span class="topbar-brand">Reward Banking</span>
+        <span class="topbar-user">Logged in as <span>{{ username }}</span></span>
+    </nav>
+
+    <main class="main">
+        <div class="page-heading">
+            <h1>Welcome back, {{ name }}.</h1>
+            <p>Here's an overview of your account.</p>
+        </div>
+
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="label">Available Balance</div>
+                <div class="value">₱{{ "{:,.2f}".format(money) }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">Reward Points</div>
+                <div class="value">{{ points }}<small>pts</small></div>
+            </div>
+        </div>
+
+        <div class="actions-grid">
+            <a href="/atm" class="action-card primary">
+                <div class="action-icon">💳</div>
+                <div class="action-title">Deposit Cash</div>
+                <div class="action-desc">Add funds to your account instantly</div>
+            </a>
+            <a href="/store" class="action-card">
+                <div class="action-icon">🛒</div>
+                <div class="action-title">Visit Store</div>
+                <div class="action-desc">Browse and buy items with your balance</div>
+            </a>
+            <a href="/rewards" class="action-card">
+                <div class="action-icon">🎁</div>
+                <div class="action-title">Claim Rewards</div>
+                <div class="action-desc">Redeem your points for goodies</div>
+            </a>
+        </div>
+
+        <a href="/logout" class="action-card danger" style="margin-top: 14px; flex-direction: row; align-items: center; gap: 12px;">
+            <div class="action-icon">🚪</div>
+            <div>
+                <div class="action-title">Logout</div>
+                <div class="action-desc">Sign out of your account</div>
+            </div>
+        </a>
+    </main>
+</body>
+</html>

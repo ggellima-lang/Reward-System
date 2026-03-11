@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reward Shop</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { min-height: 100vh; display: flex; flex-direction: column; background: var(--bg); align-items: flex-start !important; justify-content: flex-start !important; }
+        .topbar { width: 100%; padding: 1.2rem 2.5rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.06); background: rgba(6,9,18,0.8); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 10; }
+        .topbar-brand { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 800; color: #fff; }
+        .topbar-back { font-size: 0.82rem; color: #6b7a99; text-decoration: none; transition: color 0.2s; }
+        .topbar-back:hover { color: #eef2ff; }
+        .main { flex: 1; padding: 2rem 2.5rem 3rem; max-width: 700px; width: 100%; margin: 0 auto; }
+        .page-heading { margin-bottom: 1rem; }
+        .page-heading h1 { font-family: 'Syne', sans-serif; font-size: 2.8rem; font-weight: 800; color: #fff; letter-spacing: -0.03em; margin-bottom: 0.3rem; }
+        .page-heading p { color: #6b7a99; font-size: 0.95rem; }
+        .points-bar { background: rgba(0,245,196,0.06); border: 1px solid rgba(0,245,196,0.15); border-radius: 16px; padding: 1.2rem 1.6rem; display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
+        .points-bar-label { font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #6b7a99; }
+        .points-bar-value { font-family: 'Syne', sans-serif; font-size: 1.6rem; font-weight: 800; color: #00f5c4; }
+        .points-bar-value small { font-size: 0.85rem; margin-left: 4px; opacity: 0.7; }
+        .message { padding: 14px 18px; border-radius: 12px; margin-bottom: 1.5rem; font-size: 0.9rem; background: rgba(0,245,196,0.08); border: 1px solid rgba(0,245,196,0.2); color: #00f5c4; }
+        .message.error { background: rgba(255,77,109,0.08); border-color: rgba(255,77,109,0.2); color: #ff4d6d; }
+        .section-title { font-family: 'Syne', sans-serif; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #6b7a99; margin-bottom: 10px; margin-top: 1.5rem; }
+        .rewards-grid { display: flex; flex-direction: column; gap: 10px; margin-bottom: 0.5rem; }
+        .reward-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 16px; padding: 1.2rem 1.6rem; display: flex; align-items: center; justify-content: space-between; transition: all 0.2s ease; }
+        .reward-card:hover { border-color: rgba(0,245,196,0.3); background: rgba(0,245,196,0.04); transform: translateY(-2px); }
+        .reward-left { display: flex; align-items: center; gap: 12px; }
+        .reward-emoji { font-size: 1.5rem; }
+        .reward-info { display: flex; flex-direction: column; gap: 2px; }
+        .reward-name { font-weight: 600; font-size: 0.95rem; text-transform: capitalize; color: #eef2ff; }
+        .reward-cost { font-size: 0.82rem; font-weight: 700; color: #00f5c4; }
+        .redeem-btn { padding: 10px 22px; font-size: 0.85rem; border-radius: 10px; background: rgba(0,245,196,0.1); color: #00f5c4; border: 1px solid rgba(0,245,196,0.3); cursor: pointer; font-weight: 600; transition: all 0.2s; white-space: nowrap; }
+        .redeem-btn:hover { background: rgba(0,245,196,0.2); box-shadow: 0 4px 16px rgba(0,245,196,0.2); }
+    </style>
+</head>
+<body>
+    <nav class="topbar">
+        <span class="topbar-brand">Reward Banking</span>
+        <a href="/dashboard" class="topbar-back">← Back to Dashboard</a>
+    </nav>
+    <main class="main">
+        <div class="page-heading">
+            <h1>Reward Shop</h1>
+            <p>Spend your points on goodies</p>
+        </div>
+        <div class="points-bar">
+            <span class="points-bar-label">Available Points</span>
+            <span class="points-bar-value">{{ points }}<small>pts</small></span>
+        </div>
+        {% if message %}
+        <div class="message {% if 'Insufficient' in message %}error{% endif %}">{{ message }}</div>
+        {% endif %}
+
+        {% set emojis = {
+            'gift card': '🎁', 'coffee voucher': '☕', 'store discount 10%': '🏷️',
+            'store discount 20%': '🏷️', 'free delivery': '🚚', 'food voucher': '🍽️',
+            'gaming mouse': '🖱️', 'phone case': '📱', 'earbuds': '🎵', 'cap': '🧢',
+            'tote bag': '👜', 'water bottle': '💧', 'notebook': '📓', 'pen set': '✒️',
+            'mystery box': '📦', 'vip membership': '⭐', 'birthday cake': '🎂', 'movie ticket': '🎬'
+        } %}
+
+        {% set vouchers = ['gift card', 'coffee voucher', 'store discount 10%', 'store discount 20%', 'free delivery', 'food voucher'] %}
+        {% set reward_items_list = ['gaming mouse', 'phone case', 'earbuds', 'cap', 'tote bag', 'water bottle', 'notebook', 'pen set'] %}
+        {% set special = ['mystery box', 'vip membership', 'birthday cake', 'movie ticket'] %}
+
+        <div class="section-title">🎟️ Vouchers</div>
+        <div class="rewards-grid">
+            {% for item, cost in items.items() %}
+            {% if item in vouchers %}
+            <div class="reward-card">
+                <div class="reward-left">
+                    <span class="reward-emoji">{{ emojis.get(item, '🎁') }}</span>
+                    <div class="reward-info">
+                        <span class="reward-name">{{ item }}</span>
+                        <span class="reward-cost">{{ cost }} pts</span>
+                    </div>
+                </div>
+                <form method="POST">
+                    <input type="hidden" name="item" value="{{ item }}">
+                    <button class="redeem-btn" type="submit">Redeem</button>
+                </form>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+
+        <div class="section-title">🎀 Items</div>
+        <div class="rewards-grid">
+            {% for item, cost in items.items() %}
+            {% if item in reward_items_list %}
+            <div class="reward-card">
+                <div class="reward-left">
+                    <span class="reward-emoji">{{ emojis.get(item, '🎁') }}</span>
+                    <div class="reward-info">
+                        <span class="reward-name">{{ item }}</span>
+                        <span class="reward-cost">{{ cost }} pts</span>
+                    </div>
+                </div>
+                <form method="POST">
+                    <input type="hidden" name="item" value="{{ item }}">
+                    <button class="redeem-btn" type="submit">Redeem</button>
+                </form>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+
+        <div class="section-title">⭐ Special</div>
+        <div class="rewards-grid">
+            {% for item, cost in items.items() %}
+            {% if item in special %}
+            <div class="reward-card">
+                <div class="reward-left">
+                    <span class="reward-emoji">{{ emojis.get(item, '🎁') }}</span>
+                    <div class="reward-info">
+                        <span class="reward-name">{{ item }}</span>
+                        <span class="reward-cost">{{ cost }} pts</span>
+                    </div>
+                </div>
+                <form method="POST">
+                    <input type="hidden" name="item" value="{{ item }}">
+                    <button class="redeem-btn" type="submit">Redeem</button>
+                </form>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+    </main>
+</body>
+</html>

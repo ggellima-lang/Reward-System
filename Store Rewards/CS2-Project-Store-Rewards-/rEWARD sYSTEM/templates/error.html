@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg);
+        }
+
+        .topbar {
+            width: 100%;
+            padding: 1.2rem 2.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            background: rgba(6,9,18,0.8);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .topbar-brand {
+            font-family: 'Syne', sans-serif;
+            font-size: 1rem;
+            font-weight: 800;
+            color: #fff;
+        }
+
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 3rem 2.5rem;
+            max-width: 600px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .error-icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+        }
+
+        h1 {
+            font-family: 'Syne', sans-serif;
+            font-size: 2.8rem;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: -0.03em;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: #6b7a99;
+            font-size: 0.95rem;
+            margin-bottom: 2rem;
+        }
+
+        .error-message {
+            background: rgba(255,77,109,0.08);
+            border: 1px solid rgba(255,77,109,0.2);
+            color: #ff4d6d;
+            border-radius: 16px;
+            padding: 18px 22px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            margin-bottom: 2rem;
+            line-height: 1.5;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 14px 28px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.92rem;
+            background: #4f8ef7;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn:hover { background: #3a7ef0; }
+    </style>
+</head>
+<body>
+    <nav class="topbar">
+        <span class="topbar-brand">Reward Banking</span>
+    </nav>
+
+    <main class="main">
+        <div class="error-icon">⚠️</div>
+        <h1>Something went wrong</h1>
+        <p class="subtitle">Don't worry, here's what happened:</p>
+        <div class="error-message">{{ message }}</div>
+        <a href="/" class="btn">Go Home</a>
+    </main>
+</body>
+</html>

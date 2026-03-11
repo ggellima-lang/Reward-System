@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reward Banking System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg);
+        }
+
+        .topbar {
+            width: 100%;
+            padding: 1.2rem 2.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            background: rgba(6,9,18,0.8);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .topbar-brand {
+            font-family: 'Syne', sans-serif;
+            font-size: 1rem;
+            font-weight: 800;
+            color: #fff;
+        }
+
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 3rem 2.5rem;
+            max-width: 600px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .page-heading {
+            margin-bottom: 3rem;
+        }
+
+        .page-heading h1 {
+            font-family: 'Syne', sans-serif;
+            font-size: 3.2rem;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: -0.03em;
+            margin-bottom: 0.6rem;
+            line-height: 1.1;
+        }
+
+        .page-heading p {
+            color: #6b7a99;
+            font-size: 1rem;
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            border-radius: 14px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.07);
+            background: rgba(255,255,255,0.04);
+            color: #eef2ff;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 10px;
+        }
+
+        .btn:hover {
+            background: rgba(255,255,255,0.09);
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            background: #4f8ef7;
+            border: none;
+            color: white;
+            box-shadow: 0 4px 20px rgba(79,142,247,0.3);
+        }
+
+        .btn-primary:hover {
+            background: #3a7ef0;
+            box-shadow: 0 8px 28px rgba(79,142,247,0.4);
+        }
+
+        .btn-outline {
+            border-color: rgba(255,255,255,0.1);
+            color: #6b7a99;
+        }
+
+        .btn-outline:hover {
+            color: #eef2ff;
+            border-color: rgba(255,255,255,0.2);
+        }
+    </style>
+</head>
+<body>
+    <nav class="topbar">
+        <span class="topbar-brand">Reward Banking</span>
+    </nav>
+
+    <main class="main">
+        <div class="page-heading">
+            <h1>Reward Banking System</h1>
+            <p>Securely manage your deposits and rewards.</p>
+        </div>
+
+        <div class="button-group">
+            <a href="/login" class="btn btn-primary">Login to Account</a>
+            <a href="/register" class="btn">Create New Account</a>
+            <a href="/admin" class="btn btn-outline">Administrator Access</a>
+        </div>
+    </main>
+</body>
+</html>
