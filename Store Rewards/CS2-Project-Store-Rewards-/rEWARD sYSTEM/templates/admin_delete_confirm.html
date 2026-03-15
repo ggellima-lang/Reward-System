@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirm Delete — Admin</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        :root { --accent-blue: #4f8ef7; --accent-green: #00f5c4; --accent-red: #ff4d6d; --text-secondary: #6b7a99; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { min-height: 100vh; display: flex; flex-direction: column; background: linear-gradient(135deg, #0a0e1a 0%, #1a1f2e 100%); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        .topbar { width: 100%; padding: 1.2rem 2.5rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.06); background: rgba(6,9,18,0.8); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 10; }
+        .topbar-brand { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 800; color: #fff; }
+        .topbar-back { font-size: 0.82rem; color: #6b7a99; text-decoration: none; }
+        .topbar-back:hover { color: #eef2ff; }
+        .admin-badge { background: rgba(0,245,196,0.1); border: 1px solid rgba(0,245,196,0.3); color: var(--accent-green); font-size: 0.7rem; font-weight: 700; padding: 4px 12px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.08em; }
+        .main { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 3rem 2.5rem; max-width: 480px; width: 100%; margin: 0 auto; }
+        .danger-icon { font-size: 4rem; margin-bottom: 1.5rem; }
+        h1 { font-family: 'Syne', sans-serif; font-size: 2.4rem; font-weight: 800; color: #fff; letter-spacing: -0.03em; margin-bottom: 0.5rem; }
+        .subtitle { color: #6b7a99; font-size: 0.95rem; margin-bottom: 2rem; }
+        .warning-box { background: rgba(255,77,109,0.08); border: 1px solid rgba(255,77,109,0.25); border-radius: 16px; padding: 1.4rem 1.6rem; margin-bottom: 2rem; }
+        .warning-box p { color: #ff4d6d; font-size: 0.92rem; line-height: 1.6; }
+        .warning-box p strong { color: #fff; }
+        .btn-row { display: flex; gap: 10px; }
+        .btn { flex: 1; padding: 14px; border-radius: 13px; font-weight: 600; font-size: 0.92rem; text-align: center; border: none; cursor: pointer; transition: all 0.2s ease; text-decoration: none; display: block; }
+        .btn-danger { background: rgba(255,77,109,0.15); color: var(--accent-red); border: 1px solid rgba(255,77,109,0.35); }
+        .btn-danger:hover { background: rgba(255,77,109,0.25); }
+        .btn-secondary { background: rgba(255,255,255,0.05); color: #6b7a99; border: 1px solid rgba(255,255,255,0.1); }
+        .btn-secondary:hover { background: rgba(255,255,255,0.09); color: #eef2ff; }
+    </style>
+</head>
+<body>
+    <nav class="topbar">
+        <span class="topbar-brand">Reward Banking</span>
+        <div style="display:flex; gap:12px; align-items:center;">
+            <a href="/admin" class="topbar-back">← Back to Admin Panel</a>
+            <span class="admin-badge">● Admin</span>
+        </div>
+    </nav>
+    <main class="main">
+        <div class="danger-icon">⚠️</div>
+        <h1>Confirm Delete</h1>
+        <p class="subtitle">This action is permanent and cannot be undone.</p>
+        <div class="warning-box">
+            <p>You are about to permanently delete the account <strong>@{{ target }}</strong>, including all their balance and reward points.</p>
+        </div>
+        <div class="btn-row">
+            <form method="POST" action="{{ url_for('admin_delete', target_user=target) }}" style="flex:1;">
+                <button type="submit" class="btn btn-danger" style="width:100%;">Yes, Delete</button>
+            </form>
+            <a href="/admin" class="btn btn-secondary">Cancel</a>
+        </div>
+    </main>
+</body>
+</html>
