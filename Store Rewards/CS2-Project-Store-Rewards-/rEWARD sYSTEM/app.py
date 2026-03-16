@@ -157,10 +157,29 @@ def rewards():
     return render_template("rewards.html", items=reward_items, message=message, points=accounts[user][5])
 
 
+@app.route("/verify_identity", methods=["GET", "POST"])
+def verify_identity():
+    if "user" not in session:
+        return redirect(url_for("login"))
+    next_page = request.args.get("next", "edit_profile")
+    error = ""
+    if request.method == "POST":
+        entered_username = request.form["username"].strip()
+        entered_password = request.form["password"].strip()
+        user = session["user"]
+        if entered_username == user and entered_password == accounts[user][0]:
+            session["verified"] = True
+            return redirect(url_for(next_page))
+        error = "Incorrect username or password."
+    return render_template("verify_identity.html", next=next_page, error=error)
+
+
 @app.route("/edit_profile", methods=["GET", "POST"])
 def edit_profile():
     if "user" not in session:
         return redirect(url_for("login"))
+    if not session.get("verified"):
+        return redirect(url_for("verify_identity", next="edit_profile"))
     user = session["user"]
     data = accounts[user]
     error = ""
@@ -182,6 +201,7 @@ def edit_profile():
             accounts[user][1] = new_name
             accounts[user][2] = new_age
             accounts[user][3] = new_address
+            session.pop("verified", None)
             return render_template("edit_profile.html", username=user, data=accounts[user], success="Profile updated successfully!")
     return render_template("edit_profile.html", username=user, data=data, error=error)
 
@@ -190,12 +210,15 @@ def edit_profile():
 def delete_account():
     if "user" not in session:
         return redirect(url_for("login"))
+    if not session.get("verified"):
+        return redirect(url_for("verify_identity", next="delete_account"))
     user = session["user"]
     if request.method == "POST":
         confirm = request.form.get("confirm", "").strip()
         if confirm == user:
             del accounts[user]
             session.pop("user", None)
+            session.pop("verified", None)
             return render_template("home.html", delete_success="Your account has been deleted.")
         return render_template("delete_account.html", username=user, typed=confirm, error="That username didn't match. Please try again.")
     return render_template("delete_account.html", username=user, typed="")
@@ -287,6 +310,7 @@ def admin_delete(target_user):
 def logout():
     session.pop("user", None)
     session.pop("admin", None)
+    session.pop("verified", None)
     return redirect(url_for("home"))
 
 
