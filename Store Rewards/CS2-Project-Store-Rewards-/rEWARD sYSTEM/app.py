@@ -199,30 +199,6 @@ def delete_account():
             return render_template("home.html", delete_success="Your account has been deleted.")
         return render_template("delete_account.html", username=user, typed=confirm, error="That username didn't match. Please try again.")
     return render_template("delete_account.html", username=user, typed="")
-def delete_account():
-    if "user" not in session:
-        return redirect(url_for("login"))
-    user = session["user"]
-    if request.method == "POST":
-        confirm = request.form.get("confirm", "").strip()
-        if confirm == user:
-            del accounts[user]
-            session.pop("user", None)
-            return render_template("home.html", delete_success="Your account has been deleted.")
-        return render_template("delete_account.html", username=user, typed=confirm, error="That username didn't match. Please try again.")
-    return render_template("delete_account.html", username=user, typed="")@app.route("/delete_account", methods=["GET", "POST"])
-def delete_account():
-    if "user" not in session:
-        return redirect(url_for("login"))
-    user = session["user"]
-    if request.method == "POST":
-        confirm = request.form.get("confirm", "").strip()
-        if confirm == user:
-            del accounts[user]
-            session.pop("user", None)
-            return render_template("home.html", delete_success="Your account has been deleted.")
-        return render_template("delete_account.html", username=user, typed=confirm, error="That username didn't match. Please try again.")
-    return render_template("delete_account.html", username=user, typed="")
 
 
 @app.route("/admin", methods=["GET", "POST"])
