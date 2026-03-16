@@ -24,6 +24,8 @@
         input { width: 100%; padding: 14px 18px; border-radius: 13px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: #eef2ff; font-size: 0.95rem; outline: none; transition: border-color 0.2s; }
         input:focus { border-color: rgba(79,142,247,0.6); background: rgba(255,255,255,0.07); }
         input::placeholder { color: #4a5568; }
+        input.invalid { border-color: rgba(255,77,109,0.6); background: rgba(255,77,109,0.04); }
+        .field-error { color: #ff4d6d; font-size: 0.8rem; padding-left: 4px; margin-top: 2px; }
         .btn-row { display: flex; gap: 10px; margin-top: 6px; }
         .btn { flex: 1; padding: 14px; border-radius: 13px; font-weight: 600; font-size: 0.92rem; text-align: center; border: none; cursor: pointer; transition: all 0.2s ease; text-decoration: none; display: block; }
         .btn-primary { background: #4f8ef7; color: white; }
@@ -43,21 +45,21 @@
             <h1>Verify Identity</h1>
             <p>Confirm your username and password before making changes to your account.</p>
         </div>
-        <div class="info-box">
-            🛡️ This is a security check. You must verify your identity before editing or deleting your account.
-        </div>
-        {% if error %}
-        <div class="server-error">{{ error }}</div>
+        <div class="info-box">🛡️ This is a security check. You must verify your identity before editing or deleting your account.</div>
+        {% if errors.general %}
+        <div class="server-error">{{ errors.general }}</div>
         {% endif %}
         <form method="POST">
             <input type="hidden" name="next" value="{{ next }}">
             <div class="field-wrap">
                 <label for="username">Username</label>
-                <input id="username" name="username" type="text" placeholder="Enter your username" autocomplete="username">
+                <input id="username" name="username" type="text" placeholder="Enter your username" class="{{ 'invalid' if errors.username }}" autocomplete="username">
+                {% if errors.username %}<span class="field-error">{{ errors.username }}</span>{% endif %}
             </div>
             <div class="field-wrap">
                 <label for="password">Password</label>
-                <input id="password" name="password" type="password" placeholder="Enter your password" autocomplete="current-password">
+                <input id="password" name="password" type="password" placeholder="Enter your password" class="{{ 'invalid' if errors.password }}" autocomplete="current-password">
+                {% if errors.password %}<span class="field-error">{{ errors.password }}</span>{% endif %}
             </div>
             <div class="btn-row">
                 <button type="submit" class="btn btn-primary">Confirm</button>

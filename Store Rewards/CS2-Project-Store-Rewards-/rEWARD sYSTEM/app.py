@@ -70,6 +70,7 @@ def login():
 def dashboard():
     if "user" not in session:
         return redirect(url_for("login"))
+    session.pop("verified", None)
     user = session["user"]
     data = accounts[user]
     return render_template("dashboard.html", username=user, name=data[1], money=data[4], points=data[5])
@@ -162,16 +163,21 @@ def verify_identity():
     if "user" not in session:
         return redirect(url_for("login"))
     next_page = request.args.get("next", "edit_profile")
-    error = ""
+    errors = {}
     if request.method == "POST":
         entered_username = request.form["username"].strip()
         entered_password = request.form["password"].strip()
         user = session["user"]
-        if entered_username == user and entered_password == accounts[user][0]:
-            session["verified"] = True
-            return redirect(url_for(next_page))
-        error = "Incorrect username or password."
-    return render_template("verify_identity.html", next=next_page, error=error)
+        if not entered_username:
+            errors["username"] = "Username is required."
+        if not entered_password:
+            errors["password"] = "Password is required."
+        if not errors:
+            if entered_username == user and entered_password == accounts[user][0]:
+                session["verified"] = True
+                return redirect(url_for(next_page))
+            errors["general"] = "Incorrect username or password."
+    return render_template("verify_identity.html", next=next_page, errors=errors)
 
 
 @app.route("/edit_profile", methods=["GET", "POST"])
@@ -182,28 +188,29 @@ def edit_profile():
         return redirect(url_for("verify_identity", next="edit_profile"))
     user = session["user"]
     data = accounts[user]
-    error = ""
+    errors = {}
     if request.method == "POST":
         new_password = request.form["password"].strip()
         new_name     = request.form["name"].strip()
         new_age      = request.form["age"].strip()
         new_address  = request.form["address"].strip()
         if not new_password or len(new_password) < 4:
-            error = "Password must be at least 4 characters."
-        elif not new_name or len(new_name) < 2:
-            error = "Full name must be at least 2 characters."
-        elif not new_age or not new_age.isdigit() or not (1 <= int(new_age) <= 120):
-            error = "Enter a valid age between 1 and 120."
-        elif not new_address or len(new_address) < 3:
-            error = "Address must be at least 3 characters."
-        else:
+            errors["password"] = "Password must be at least 4 characters."
+        if not new_name or len(new_name) < 2:
+            errors["name"] = "Full name must be at least 2 characters."
+        if not new_age or not new_age.isdigit() or not (1 <= int(new_age) <= 120):
+            errors["age"] = "Enter a valid age between 1 and 120."
+        if not new_address or len(new_address) < 3:
+            errors["address"] = "Address must be at least 3 characters."
+        if not errors:
             accounts[user][0] = new_password
             accounts[user][1] = new_name
             accounts[user][2] = new_age
             accounts[user][3] = new_address
             session.pop("verified", None)
-            return render_template("edit_profile.html", username=user, data=accounts[user], success="Profile updated successfully!")
-    return render_template("edit_profile.html", username=user, data=data, error=error)
+            return render_template("edit_profile.html", username=user, data=accounts[user], success="Profile updated successfully!", errors={})
+        data = [new_password, new_name, new_age, new_address, data[4], data[5]]
+    return render_template("edit_profile.html", username=user, data=data, errors=errors)
 
 
 @app.route("/delete_account", methods=["GET", "POST"])
@@ -253,7 +260,7 @@ def admin_edit(target_user):
     if target_user not in accounts:
         return render_template("error.html", message="User not found.")
     data = accounts[target_user]
-    error = ""
+    errors = {}
     if request.method == "POST":
         new_password = request.form["password"].strip()
         new_name     = request.form["name"].strip()
@@ -263,27 +270,30 @@ def admin_edit(target_user):
             new_money  = int(request.form["money"].strip())
             new_points = int(request.form["points"].strip())
         except ValueError:
-            error = "Balance and points must be valid numbers."
-            return render_template("admin_edit.html", target=target_user, data=data, error=error)
+            errors["money"] = "Balance and points must be valid numbers."
+            return render_template("admin_edit.html", target=target_user, data=data, errors=errors)
         if not new_password or len(new_password) < 4:
-            error = "Password must be at least 4 characters."
-        elif not new_name or len(new_name) < 2:
-            error = "Full name must be at least 2 characters."
-        elif not new_age or not new_age.isdigit() or not (1 <= int(new_age) <= 120):
-            error = "Enter a valid age between 1 and 120."
-        elif not new_address or len(new_address) < 3:
-            error = "Address must be at least 3 characters."
-        elif new_money < 0 or new_points < 0:
-            error = "Balance and points cannot be negative."
-        else:
+            errors["password"] = "Password must be at least 4 characters."
+        if not new_name or len(new_name) < 2:
+            errors["name"] = "Full name must be at least 2 characters."
+        if not new_age or not new_age.isdigit() or not (1 <= int(new_age) <= 120):
+            errors["age"] = "Enter a valid age between 1 and 120."
+        if not new_address or len(new_address) < 3:
+            errors["address"] = "Address must be at least 3 characters."
+        if new_money < 0:
+            errors["money"] = "Balance cannot be negative."
+        if new_points < 0:
+            errors["points"] = "Points cannot be negative."
+        if not errors:
             accounts[target_user][0] = new_password
             accounts[target_user][1] = new_name
             accounts[target_user][2] = new_age
             accounts[target_user][3] = new_address
             accounts[target_user][4] = new_money
             accounts[target_user][5] = new_points
-            return render_template("admin_edit.html", target=target_user, data=accounts[target_user], success=f"Account '{target_user}' updated successfully!")
-    return render_template("admin_edit.html", target=target_user, data=data, error=error)
+            return render_template("admin_edit.html", target=target_user, data=accounts[target_user], success=f"Account '{target_user}' updated successfully!", errors={})
+        data = [new_password, new_name, new_age, new_address, new_money, new_points]
+    return render_template("admin_edit.html", target=target_user, data=data, errors=errors)
 
 
 @app.route("/admin/delete/confirm/<target_user>")

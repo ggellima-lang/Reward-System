@@ -17,13 +17,14 @@
         .page-heading h1 { font-family: 'Syne', sans-serif; font-size: 2.8rem; font-weight: 800; color: #fff; letter-spacing: -0.03em; margin-bottom: 0.3rem; }
         .page-heading p { color: #6b7a99; font-size: 0.95rem; }
         .username-chip { display: inline-block; background: rgba(79,142,247,0.1); border: 1px solid rgba(79,142,247,0.25); color: #4f8ef7; border-radius: 20px; padding: 4px 14px; font-size: 0.82rem; font-weight: 700; margin-bottom: 1.5rem; }
-        .server-error { background: rgba(255,77,109,0.08); border: 1px solid rgba(255,77,109,0.2); color: #ff4d6d; border-radius: 12px; padding: 14px 18px; font-size: 0.92rem; margin-bottom: 1.2rem; }
         .server-success { background: rgba(0,245,196,0.08); border: 1px solid rgba(0,245,196,0.25); color: #00f5c4; border-radius: 12px; padding: 14px 18px; font-size: 0.92rem; margin-bottom: 1.2rem; font-weight: 500; }
         .field-wrap { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
         label { font-size: 0.8rem; font-weight: 600; color: #6b7a99; padding-left: 4px; display: block; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 2px; }
         input { width: 100%; padding: 15px 18px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: #eef2ff; font-size: 0.95rem; outline: none; transition: border-color 0.2s; }
         input:focus { border-color: rgba(79,142,247,0.6); }
         input::placeholder { color: #4a5568; }
+        input.invalid { border-color: rgba(255,77,109,0.6); background: rgba(255,77,109,0.04); }
+        .field-error { color: #ff4d6d; font-size: 0.8rem; padding-left: 4px; margin-top: 2px; }
         .form-group { margin-bottom: 1.5rem; }
         .btn-row { display: flex; gap: 10px; }
         .btn { flex: 1; padding: 15px; border-radius: 14px; font-weight: 600; font-size: 0.95rem; text-align: center; border: none; cursor: pointer; transition: all 0.2s ease; text-decoration: none; display: block; }
@@ -47,26 +48,28 @@
         {% if success %}
         <div class="server-success">✅ {{ success }}</div>
         {% endif %}
-        {% if error %}
-        <div class="server-error">{{ error }}</div>
-        {% endif %}
+        {% set errors = errors if errors is defined else {} %}
         <form method="POST">
             <div class="form-group">
                 <div class="field-wrap">
                     <label for="password">New Password</label>
-                    <input id="password" name="password" type="password" placeholder="Enter new password" value="{{ data[0] }}">
+                    <input id="password" name="password" type="password" placeholder="Enter new password" class="{{ 'invalid' if errors.password }}" value="{{ data[0] }}">
+                    {% if errors.password %}<span class="field-error">{{ errors.password }}</span>{% endif %}
                 </div>
                 <div class="field-wrap">
                     <label for="name">Full Name</label>
-                    <input id="name" name="name" placeholder="Enter full name" value="{{ data[1] }}">
+                    <input id="name" name="name" placeholder="Enter full name" class="{{ 'invalid' if errors.name }}" value="{{ data[1] }}">
+                    {% if errors.name %}<span class="field-error">{{ errors.name }}</span>{% endif %}
                 </div>
                 <div class="field-wrap">
                     <label for="age">Age</label>
-                    <input id="age" name="age" type="number" placeholder="Enter age" value="{{ data[2] }}">
+                    <input id="age" name="age" type="number" placeholder="Enter age" class="{{ 'invalid' if errors.age }}" value="{{ data[2] }}">
+                    {% if errors.age %}<span class="field-error">{{ errors.age }}</span>{% endif %}
                 </div>
                 <div class="field-wrap">
                     <label for="address">Address</label>
-                    <input id="address" name="address" placeholder="Enter address" value="{{ data[3] }}">
+                    <input id="address" name="address" placeholder="Enter address" class="{{ 'invalid' if errors.address }}" value="{{ data[3] }}">
+                    {% if errors.address %}<span class="field-error">{{ errors.address }}</span>{% endif %}
                 </div>
             </div>
             <div class="btn-row">
