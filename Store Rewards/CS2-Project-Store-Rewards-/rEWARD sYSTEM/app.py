@@ -309,6 +309,9 @@ def admin_delete_confirm(target_user):
 def admin_delete(target_user):
     if not session.get("admin"):
         return redirect(url_for("admin"))
+    confirm = request.form.get("confirm", "").strip()
+    if confirm != target_user:
+        return render_template("admin_delete_confirm.html", target=target_user, typed=confirm, error="Username did not match. Deletion cancelled.")
     if target_user in accounts:
         del accounts[target_user]
         if session.get("user") == target_user:

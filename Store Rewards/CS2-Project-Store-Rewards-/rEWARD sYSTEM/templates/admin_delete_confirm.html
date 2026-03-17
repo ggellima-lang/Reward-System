@@ -21,6 +21,15 @@
         .warning-box { background: rgba(255,77,109,0.08); border: 1px solid rgba(255,77,109,0.25); border-radius: 16px; padding: 1.4rem 1.6rem; margin-bottom: 2rem; }
         .warning-box p { color: #ff4d6d; font-size: 0.92rem; line-height: 1.6; }
         .warning-box p strong { color: #fff; }
+        .server-error { background: rgba(255,77,109,0.08); border: 1px solid rgba(255,77,109,0.2); color: #ff4d6d; border-radius: 12px; padding: 14px 18px; font-size: 0.92rem; margin-bottom: 0.6rem; }
+        .typed-hint { font-size: 0.82rem; color: #6b7a99; padding-left: 4px; margin-bottom: 10px; }
+        .typed-hint span { color: #ff4d6d; font-family: monospace; font-weight: 700; }
+        .confirm-label { font-size: 0.82rem; font-weight: 600; color: #6b7a99; padding-left: 4px; margin-bottom: 6px; display: block; text-transform: uppercase; letter-spacing: 0.06em; }
+        .confirm-label span { color: #eef2ff; font-family: monospace; font-size: 0.9rem; }
+        input { width: 100%; padding: 15px 18px; border-radius: 14px; border: 1px solid rgba(255,77,109,0.3); background: rgba(255,77,109,0.04); color: #eef2ff; font-size: 0.95rem; outline: none; transition: border-color 0.2s; margin-bottom: 14px; }
+        input.has-error { border-color: rgba(255,77,109,0.7); box-shadow: 0 0 0 3px rgba(255,77,109,0.1); }
+        input:focus { border-color: rgba(255,77,109,0.7); }
+        input::placeholder { color: #4a5568; }
         .btn-row { display: flex; gap: 10px; }
         .btn { flex: 1; padding: 14px; border-radius: 13px; font-weight: 600; font-size: 0.92rem; text-align: center; border: none; cursor: pointer; transition: all 0.2s ease; text-decoration: none; display: block; }
         .btn-danger { background: rgba(255,77,109,0.15); color: var(--accent-red); border: 1px solid rgba(255,77,109,0.35); }
@@ -44,12 +53,20 @@
         <div class="warning-box">
             <p>You are about to permanently delete the account <strong>@{{ target }}</strong>, including all their balance and reward points.</p>
         </div>
-        <div class="btn-row">
-            <form method="POST" action="{{ url_for('admin_delete', target_user=target) }}" style="flex:1;">
-                <button type="submit" class="btn btn-danger" style="width:100%;">Yes, Delete</button>
-            </form>
-            <a href="/admin" class="btn btn-secondary">Cancel</a>
-        </div>
+        {% if error %}
+        <div class="server-error">{{ error }}</div>
+        {% if typed %}
+        <p class="typed-hint">You typed: <span>{{ typed }}</span></p>
+        {% endif %}
+        {% endif %}
+        <form method="POST" action="{{ url_for('admin_delete', target_user=target) }}">
+            <label class="confirm-label" for="confirm">Type username to confirm: <span>{{ target }}</span></label>
+            <input id="confirm" name="confirm" placeholder="Enter username to confirm" class="{{ 'has-error' if error else '' }}" value="{{ typed if typed else '' }}">
+            <div class="btn-row">
+                <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                <a href="/admin" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
     </main>
 </body>
 </html>
