@@ -53,20 +53,17 @@
         <div class="warning-box">
             <p>You are about to permanently delete the account <strong>@{{ target }}</strong>, including all their balance and reward points.</p>
         </div>
-        {% if error %}
-        <div class="server-error">{{ error }}</div>
-        {% if typed %}
-        <p class="typed-hint">You typed: <span>{{ typed }}</span></p>
-        {% endif %}
-        {% endif %}
-        <form method="POST" action="{{ url_for('admin_delete', target_user=target) }}">
-            <label class="confirm-label" for="confirm">Type username to confirm: <span>{{ target }}</span></label>
-            <input id="confirm" name="confirm" placeholder="Enter username to confirm" class="{{ 'has-error' if error else '' }}" value="{{ typed if typed else '' }}">
-            <div class="btn-row">
-                <button type="submit" class="btn btn-danger">Yes, Delete</button>
-                <a href="/admin" class="btn btn-secondary">Cancel</a>
-            </div>
-        </form>
+       {% if error %}
+<div class="server-error">{{ error }}</div>
+{% endif %}
+<form method="POST" action="{{ url_for('admin_delete', target_user=target) }}">
+    <label class="confirm-label" for="confirm_pass">Enter admin password to confirm</label>
+    <input id="confirm_pass" name="confirm_pass" type="password" placeholder="Enter your admin password" class="{{ 'has-error' if error else '' }}">
+    <div class="btn-row">
+        <button type="submit" class="btn btn-danger">Yes, Delete</button>
+        <a href="/admin" class="btn btn-secondary">Cancel</a>
+    </div>
+</form>
     </main>
 </body>
 </html>

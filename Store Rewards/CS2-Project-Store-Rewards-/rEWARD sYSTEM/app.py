@@ -309,15 +309,14 @@ def admin_delete_confirm(target_user):
 def admin_delete(target_user):
     if not session.get("admin"):
         return redirect(url_for("admin"))
-    confirm = request.form.get("confirm", "").strip()
-    if confirm != target_user:
-        return render_template("admin_delete_confirm.html", target=target_user, typed=confirm, error="Username did not match. Deletion cancelled.")
+    confirm_pass = request.form.get("confirm_pass", "").strip()
+    if confirm_pass != ADMIN_PASS:
+        return render_template("admin_delete_confirm.html", target=target_user, error="Incorrect admin password. Deletion cancelled.")
     if target_user in accounts:
         del accounts[target_user]
         if session.get("user") == target_user:
             session.pop("user", None)
     return render_template("admin.html", accounts=accounts, success=f"Account '{target_user}' has been deleted.")
-
 
 @app.route("/logout")
 def logout():
