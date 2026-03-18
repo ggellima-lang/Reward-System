@@ -213,23 +213,6 @@ def edit_profile():
     return render_template("edit_profile.html", username=user, data=data, errors=errors)
 
 
-@app.route("/delete_account", methods=["GET", "POST"])
-def delete_account():
-    if "user" not in session:
-        return redirect(url_for("login"))
-    if not session.get("verified"):
-        return redirect(url_for("verify_identity", next="delete_account"))
-    user = session["user"]
-    if request.method == "POST":
-        confirm = request.form.get("confirm", "").strip()
-        if confirm == user:
-            del accounts[user]
-            session.pop("user", None)
-            session.pop("verified", None)
-            return render_template("home.html", delete_success="Your account has been deleted.")
-        return render_template("delete_account.html", username=user, typed=confirm, error="That username didn't match. Please try again.")
-    return render_template("delete_account.html", username=user, typed="")
-
 
 @app.route("/admin", methods=["GET", "POST"])
 def admin():
