@@ -20,10 +20,8 @@
         input { width: 100%; padding: 15px 18px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: #eef2ff; font-size: 0.95rem; outline: none; transition: border-color 0.2s; }
         input:focus { border-color: rgba(79,142,247,0.6); }
         input::placeholder { color: #4a5568; }
-        input.invalid { border-color: rgba(255,77,109,0.6); }
-        .field-error { color: #ff4d6d; font-size: 0.8rem; padding-left: 4px; display: none; }
-        .field-error.show { display: block; }
-        .server-error { background: rgba(255,77,109,0.08); border: 1px solid rgba(255,77,109,0.2); color: #ff4d6d; border-radius: 12px; padding: 12px 16px; font-size: 0.88rem; margin-bottom: 1rem; }
+        input.has-error { border-color: rgba(255,77,109,0.6); }
+        .server-error { background: rgba(255,77,109,0.08); border: 1px solid rgba(255,77,109,0.2); color: #ff4d6d; border-radius: 12px; padding: 14px 18px; font-size: 0.92rem; margin-bottom: 1.2rem; }
         .form-group { margin-bottom: 1.5rem; }
         .btn { display: block; width: 100%; padding: 15px; border-radius: 14px; font-weight: 600; font-size: 0.95rem; text-align: center; border: none; cursor: pointer; transition: all 0.2s ease; }
         .btn-primary { background: #4f8ef7; color: white; box-shadow: 0 4px 20px rgba(79,142,247,0.3); }
@@ -46,15 +44,13 @@
         {% if error %}
         <div class="server-error">{{ error }}</div>
         {% endif %}
-        <form method="POST" id="loginForm" novalidate>
+        <form method="POST">
             <div class="form-group">
                 <div class="field-wrap">
-                    <input id="username" name="username" placeholder="Username" autocomplete="username">
-                    <span class="field-error" id="username-error"></span>
+                    <input id="username" name="username" placeholder="Username" autocomplete="username" class="{{ 'has-error' if error else '' }}">
                 </div>
                 <div class="field-wrap">
-                    <input id="password" name="password" type="password" placeholder="Password" autocomplete="current-password">
-                    <span class="field-error" id="password-error"></span>
+                    <input id="password" name="password" type="password" placeholder="Password" autocomplete="current-password" class="{{ 'has-error' if error else '' }}">
                 </div>
             </div>
             <button type="submit" class="btn btn-primary">Login</button>

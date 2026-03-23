@@ -16,6 +16,7 @@
         .page-heading { margin-bottom: 2.5rem; }
         .page-heading h1 { font-family: 'Syne', sans-serif; font-size: 2.8rem; font-weight: 800; color: #fff; letter-spacing: -0.03em; margin-bottom: 0.3rem; }
         .page-heading p { color: #6b7a99; font-size: 0.95rem; margin: 0; }
+        .success-banner { background: rgba(0,245,196,0.08); border: 1px solid rgba(0,245,196,0.25); color: #00f5c4; border-radius: 12px; padding: 14px 18px; font-size: 0.92rem; margin-bottom: 1.5rem; font-weight: 500; }
         .stats-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 2.5rem; }
         .stat-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 20px; padding: 1.8rem 2rem; transition: border-color 0.2s; }
         .stat-card:hover { border-color: rgba(79,142,247,0.3); }
@@ -52,6 +53,9 @@
             <h1>Welcome back, {{ name }}.</h1>
             <p>Here's an overview of your account.</p>
         </div>
+        {% if success %}
+        <div class="success-banner">✅ {{ success }}</div>
+        {% endif %}
         <div class="stats-row">
             <div class="stat-card">
                 <div class="label">Available Balance</div>
@@ -87,14 +91,14 @@
                     <div class="action-desc">Update your account info</div>
                 </div>
             </a>
-
-        <a href="/logout" class="action-card danger" style="margin-top:14px; flex-direction:row; align-items:center; gap:12px;">
-            <div class="action-icon">🚪</div>
-            <div>
-                <div class="action-title">Logout</div>
-                <div class="action-desc">Sign out of your account</div>
-            </div>
-        </a>
+            <a href="/logout" class="action-card danger" style="flex-direction:row; align-items:center; gap:12px;">
+                <div class="action-icon">🚪</div>
+                <div>
+                    <div class="action-title">Logout</div>
+                    <div class="action-desc">Sign out of your account</div>
+                </div>
+            </a>
+        </div>
     </main>
 </body>
 </html>

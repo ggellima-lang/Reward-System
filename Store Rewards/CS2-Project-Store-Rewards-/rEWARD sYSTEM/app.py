@@ -73,7 +73,8 @@ def dashboard():
     session.pop("verified", None)
     user = session["user"]
     data = accounts[user]
-    return render_template("dashboard.html", username=user, name=data[1], money=data[4], points=data[5])
+    success = session.pop("success", None)
+    return render_template("dashboard.html", username=user, name=data[1], money=data[4], points=data[5], success=success)
 
 
 @app.route("/atm", methods=["GET", "POST"])
@@ -163,21 +164,18 @@ def verify_identity():
     if "user" not in session:
         return redirect(url_for("login"))
     next_page = request.args.get("next", "edit_profile")
-    errors = {}
+    error = ""
     if request.method == "POST":
-        entered_username = request.form["username"].strip()
         entered_password = request.form["password"].strip()
         user = session["user"]
-        if not entered_username:
-            errors["username"] = "Username is required."
         if not entered_password:
-            errors["password"] = "Password is required."
-        if not errors:
-            if entered_username == user and entered_password == accounts[user][0]:
-                session["verified"] = True
-                return redirect(url_for(next_page))
-            errors["general"] = "Incorrect username or password."
-    return render_template("verify_identity.html", next=next_page, errors=errors)
+            error = "Password is required."
+        elif entered_password != accounts[user][0]:
+            error = "Incorrect password."
+        else:
+            session["verified"] = True
+            return redirect(url_for(next_page))
+    return render_template("verify_identity.html", next=next_page, error=error)
 
 
 @app.route("/edit_profile", methods=["GET", "POST"])
@@ -208,10 +206,10 @@ def edit_profile():
             accounts[user][2] = new_age
             accounts[user][3] = new_address
             session.pop("verified", None)
-            return render_template("edit_profile.html", username=user, data=accounts[user], success="Profile updated successfully!", errors={})
+            session["success"] = "Profile updated successfully!"
+            return redirect(url_for("dashboard"))
         data = [new_password, new_name, new_age, new_address, data[4], data[5]]
     return render_template("edit_profile.html", username=user, data=data, errors=errors)
-
 
 
 @app.route("/admin", methods=["GET", "POST"])
@@ -232,7 +230,8 @@ def admin():
             return render_template("error.html", message="Too many failed attempts. Admin access is locked.")
         return render_template("error.html", message=f"Invalid admin login. {remaining} attempt(s) remaining.")
     if session.get("admin"):
-        return render_template("admin.html", accounts=accounts)
+        success = session.pop("success", None)
+        return render_template("admin.html", accounts=accounts, success=success)
     return render_template("admin.html", accounts=None)
 
 
@@ -274,7 +273,8 @@ def admin_edit(target_user):
             accounts[target_user][3] = new_address
             accounts[target_user][4] = new_money
             accounts[target_user][5] = new_points
-            return render_template("admin_edit.html", target=target_user, data=accounts[target_user], success=f"Account '{target_user}' updated successfully!", errors={})
+            session["success"] = f"Account '{target_user}' updated successfully!"
+            return redirect(url_for("admin"))
         data = [new_password, new_name, new_age, new_address, new_money, new_points]
     return render_template("admin_edit.html", target=target_user, data=data, errors=errors)
 
@@ -299,7 +299,9 @@ def admin_delete(target_user):
         del accounts[target_user]
         if session.get("user") == target_user:
             session.pop("user", None)
-    return render_template("admin.html", accounts=accounts, success=f"Account '{target_user}' has been deleted.")
+    session["success"] = f"Account '{target_user}' has been deleted."
+    return redirect(url_for("admin"))
+
 
 @app.route("/logout")
 def logout():
