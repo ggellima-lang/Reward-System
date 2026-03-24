@@ -49,8 +49,9 @@ def register():
         address = request.form["address"]
         if username in accounts:
             return render_template("register.html", error="Username already exists. Please choose another.")
-        accounts[username] = [password, name, age, address, 0, 0]
-        return render_template("register.html", success="Account created successfully! You can now log in.")
+        else:
+            accounts[username] = [password, name, age, address, 0, 0]
+            return render_template("register.html", success="Account created successfully! You can now log in.")
     return render_template("register.html")
 
 
@@ -62,7 +63,8 @@ def login():
         if username in accounts and accounts[username][0] == password:
             session["user"] = username
             return redirect(url_for("dashboard"))
-        return render_template("login.html", error="Invalid username or password. Please try again.")
+        else:
+            return render_template("login.html", error="Invalid username or password. Please try again.")
     return render_template("login.html")
 
 
@@ -208,7 +210,8 @@ def edit_profile():
             session.pop("verified", None)
             session["success"] = "Profile updated successfully!"
             return redirect(url_for("dashboard"))
-        data = [new_password, new_name, new_age, new_address, data[4], data[5]]
+        else:
+            data = [new_password, new_name, new_age, new_address, data[4], data[5]]
     return render_template("edit_profile.html", username=user, data=data, errors=errors)
 
 
@@ -224,15 +227,19 @@ def admin():
             admin_attempts = 0
             session["admin"] = True
             return redirect(url_for("admin"))
-        admin_attempts += 1
-        remaining = 3 - admin_attempts
-        if remaining <= 0:
-            return render_template("error.html", message="Too many failed attempts. Admin access is locked.")
-        return render_template("error.html", message=f"Invalid admin login. {remaining} attempt(s) remaining.")
-    if session.get("admin"):
+        else:
+            admin_attempts += 1
+            remaining = 3 - admin_attempts
+            if remaining <= 0:
+                return render_template("error.html", message="Too many failed attempts. Admin access is locked.")
+            else:
+                return render_template("error.html", message=f"Invalid admin login. {remaining} attempt(s) remaining.")
+    elif session.get("admin"):
         success = session.pop("success", None)
         return render_template("admin.html", accounts=accounts, is_admin=True, success=success)
-    return render_template("admin.html", accounts=None, is_admin=False)
+    else:
+        return render_template("admin.html", accounts=None, is_admin=False)
+
 
 @app.route("/admin/edit/<target_user>", methods=["GET", "POST"])
 def admin_edit(target_user):
@@ -274,7 +281,8 @@ def admin_edit(target_user):
             accounts[target_user][5] = new_points
             session["success"] = f"Account '{target_user}' updated successfully!"
             return redirect(url_for("admin"))
-        data = [new_password, new_name, new_age, new_address, new_money, new_points]
+        else:
+            data = [new_password, new_name, new_age, new_address, new_money, new_points]
     return render_template("admin_edit.html", target=target_user, data=data, errors=errors)
 
 
@@ -294,15 +302,16 @@ def admin_delete(target_user):
     confirm_pass = request.form.get("confirm_pass", "").strip()
     if confirm_pass != ADMIN_PASS:
         return render_template("admin_delete_confirm.html", target=target_user, error="Incorrect admin password. Deletion cancelled.")
-    if target_user in accounts:
-        del accounts[target_user]
-        if session.get("user") == target_user:
-            session.pop("user", None)
-    if len(accounts) == 0:
-        session["success"] = f"Account '{target_user}' has been deleted. No accounts remaining."
     else:
-        session["success"] = f"Account '{target_user}' has been deleted."
-    return redirect(url_for("admin"))
+        if target_user in accounts:
+            del accounts[target_user]
+            if session.get("user") == target_user:
+                session.pop("user", None)
+        if len(accounts) == 0:
+            session["success"] = f"Account '{target_user}' has been deleted. No accounts remaining."
+        else:
+            session["success"] = f"Account '{target_user}' has been deleted."
+        return redirect(url_for("admin"))
 
 
 @app.route("/logout")
