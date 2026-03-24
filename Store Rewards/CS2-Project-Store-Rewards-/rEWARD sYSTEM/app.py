@@ -231,9 +231,8 @@ def admin():
         return render_template("error.html", message=f"Invalid admin login. {remaining} attempt(s) remaining.")
     if session.get("admin"):
         success = session.pop("success", None)
-        return render_template("admin.html", accounts=accounts, success=success)
-    return render_template("admin.html", accounts=None)
-
+        return render_template("admin.html", accounts=accounts, is_admin=True, success=success)
+    return render_template("admin.html", accounts=None, is_admin=False)
 
 @app.route("/admin/edit/<target_user>", methods=["GET", "POST"])
 def admin_edit(target_user):
@@ -299,7 +298,10 @@ def admin_delete(target_user):
         del accounts[target_user]
         if session.get("user") == target_user:
             session.pop("user", None)
-    session["success"] = f"Account '{target_user}' has been deleted."
+    if len(accounts) == 0:
+        session["success"] = f"Account '{target_user}' has been deleted. No accounts remaining."
+    else:
+        session["success"] = f"Account '{target_user}' has been deleted."
     return redirect(url_for("admin"))
 
 

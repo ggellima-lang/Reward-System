@@ -57,13 +57,16 @@
         .action-btn-delete:hover { background: rgba(255,77,109,0.2); }
         .action-cell { display: flex; gap: 6px; }
         .server-success { background: rgba(0,245,196,0.08); border: 1px solid rgba(0,245,196,0.25); color: var(--accent-green); border-radius: 12px; padding: 14px 18px; font-size: 0.92rem; margin-bottom: 1.5rem; font-weight: 500; text-align: center; }
+        .empty-state { text-align: center; padding: 4rem 0; color: var(--text-secondary); }
+        .empty-state div { font-size: 3rem; margin-bottom: 1rem; }
+        .empty-state p { font-size: 1rem; }
         @media (max-width: 640px) { .main { padding: 2rem 1.5rem; } .page-heading h1 { font-size: 2rem; } .stats-row { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
     <nav class="topbar">
         <a href="/" class="topbar-brand">Reward Banking</a>
-        {% if accounts %}
+        {% if is_admin %}
         <span class="admin-badge active">● Live</span>
         {% else %}
         <span class="admin-badge">● Restricted</span>
@@ -72,9 +75,10 @@
     <main class="main">
         <div class="page-heading">
             <h1>Admin Panel</h1>
-            <p>{% if accounts %}Viewing all registered accounts{% else %}Restricted access{% endif %}</p>
+            <p>{% if is_admin %}Viewing all registered accounts{% else %}Restricted access{% endif %}</p>
         </div>
-        {% if not accounts %}
+
+        {% if not is_admin %}
         <div class="login-container">
             <form method="POST">
                 <div class="form-group">
@@ -88,10 +92,13 @@
                 <button type="submit" class="btn btn-primary">Login</button>
             </form>
         </div>
+
         {% else %}
         {% if success %}
         <div class="server-success">✅ {{ success }}</div>
         {% endif %}
+
+        {% if accounts %}
         <div class="stats-row">
             <div class="stat-card">
                 <div class="stat-label">Total Accounts</div>
@@ -140,6 +147,12 @@
                 </tbody>
             </table>
         </div>
+        {% else %}
+        <div class="empty-state">
+            <div>👤</div>
+            <p>No accounts registered yet.</p>
+        </div>
+        {% endif %}
         <a href="{{ url_for('logout') }}" class="btn btn-danger-outline" style="width:auto; display:inline-block;">Logout</a>
         {% endif %}
     </main>
